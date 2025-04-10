@@ -1,0 +1,123 @@
+developed a payment service using solid principles and factory design pattern
+
+using System;
+using System.Collections.Generic;
+
+// Base Interface for All Payment Methods
+public interface IPayment
+{
+    void ProcessPayment(decimal amount);
+    decimal CheckBalance();
+    List<string> PaymentHistory();
+}
+
+//  Separate Interface for Credit Card-Specific Features (ISP)
+public interface ICreditCard : IPayment
+{
+    void Repay(decimal amount);
+}
+
+//  CreditCard Implementation (Implements IPayment + CreditCard-Specific Functionalities)
+public class CreditCard : ICreditCard
+{
+    private decimal _balance = 1000m;
+    private List<string> _history = new();
+
+    public void ProcessPayment(decimal amount)
+    {
+        if (_balance >= amount)
+        {
+            _balance -= amount;
+            _history.Add($"Paid {amount} using CreditCard.");
+            Console.WriteLine($"CreditCard: Payment of {amount} processed.");
+        }
+        else
+        {
+            Console.WriteLine("CreditCard: Insufficient balance.");
+        }
+    }
+
+    public decimal CheckBalance() => _balance;
+
+    public List<string> PaymentHistory() => _history;
+
+    public void Repay(decimal amount)
+    {
+        _balance += amount;
+        _history.Add($"Repaid {amount} to CreditCard.");
+        Console.WriteLine($"CreditCard: Repaid {amount} successfully.");
+    }
+}
+
+//  PayPal Implementation (No Need for Repay)
+public class PayPal : IPayment
+{
+    private decimal _balance = 500m;
+    private List<string> _history = new();
+
+    public void ProcessPayment(decimal amount)
+    {
+        if (_balance >= amount)
+        {
+            _balance -= amount;
+            _history.Add($"Paid {amount} using PayPal.");
+            Console.WriteLine($"PayPal: Payment of {amount} processed.");
+        }
+        else
+        {
+            Console.WriteLine("PayPal: Insufficient balance.");
+        }
+    }
+
+    public decimal CheckBalance() => _balance;
+
+    public List<string> PaymentHistory() => _history;
+}
+
+//  Payment Factory (OCP: Easily Add New Payment Types Without Modifying Code)
+public static class PaymentMethodFactory
+{
+    private static readonly Dictionary<string, Func<IPayment>> _paymentMethods = new()
+    {
+        { "PAYPAL", () => new PayPal() },
+        { "CREDITCARD", () => new CreditCard() }
+    };
+
+    public static IPayment GetPaymentMethod(string type)
+    {
+        if (_paymentMethods.TryGetValue(type.ToUpper(), out var createInstance))
+        {
+            return createInstance();
+        }
+        throw new Exception("Invalid Payment Type.");
+    }
+
+    public static void RegisterPaymentType(string type, Func<IPayment> paymentObject)
+    {
+        _paymentMethods[type.ToUpper()] = paymentObject;
+    }
+}
+
+//  Client Code
+public class Client
+{
+    public static void Main()
+    {
+        // Using CreditCard
+        IPayment creditCardPayment = PaymentMethodFactory.GetPaymentMethod("CREDITCARD");
+        creditCardPayment.ProcessPayment(200);
+        Console.WriteLine($"CreditCard Balance: {creditCardPayment.CheckBalance()}");
+
+        // Using PayPal
+        IPayment paypalPayment = PaymentMethodFactory.GetPaymentMethod("PAYPAL");
+        paypalPayment.ProcessPayment(100);
+        Console.WriteLine($"PayPal Balance: {paypalPayment.CheckBalance()}");
+        
+        // Repay using CreditCard (Requires Explicit Casting to ICreditCard)
+        if (creditCardPayment is ICreditCard creditCard)
+        {
+            creditCard.Repay(50);
+            Console.WriteLine($"Updated CreditCard Balance: {creditCard.CheckBalance()}");
+        }
+    }
+}
