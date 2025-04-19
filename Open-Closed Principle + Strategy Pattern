@@ -1,0 +1,94 @@
+🚀 Exercise 1: Open-Closed Principle + Strategy Pattern
+Scenario:
+Design a payment processor that supports multiple payment methods (e.g., CreditCard, PayPal, UPI). The processor should be open for extension but closed for modification.
+
+Requirements:
+
+Create a IPaymentStrategy interface.
+
+Implement different payment methods (CreditCard, PayPal, UPI).
+
+The PaymentProcessor should take a strategy and process payment without knowing the concrete class.
+
+🔍 SOLID Focus: OCP, DIP
+🧠 Pattern: Strategy Pattern
+
+using System;
+namespace PaymentStrategypattern
+{
+    //create a interface
+    //create a concrete class(UPI,Paypal,Credit card)
+    //create a context class 
+    //main method
+    
+    public interface IPaymentService
+    {
+        void pay(decimal amount);
+    }
+    
+    public class UPIService : IPaymentService
+    {
+        public void pay(decimal amount)
+        {
+            Console.WriteLine($"Rupees {amount} paid via UPIService");
+        }
+    }
+    
+    public class PaypalService : IPaymentService
+    {
+        public void pay(decimal amount)
+        {
+            Console.WriteLine($"You have spent Rs: {amount} via paypalService");
+        }
+    }
+    
+    public class CreditCardService: IPaymentService
+    {
+        public void pay(decimal amount)
+        {
+            Console.WriteLine($"you have spent Rs: {amount} via CreditCardService");
+        }
+    }   
+    
+    //context class
+    public class PaymentBridge
+    {
+        //DI
+        private IPaymentService _IPayment;
+        
+        public PaymentBridge(IPaymentService IPayment)
+        {
+            _IPayment=IPayment;
+        }
+        
+        public void AddNewPayment(IPaymentService IPayment)
+        {
+            Console.WriteLine("We setting up your new mode:");
+            _IPayment=IPayment;
+             Console.WriteLine("We set it up ,Now Use seamlessly!");
+        }
+        
+        public void PayHere(decimal amount)
+        {
+             Console.WriteLine("We are processing you payment Transaction:..!");
+            _IPayment.pay(amount);
+            Console.WriteLine("Amount paid through Paymentbridge");
+        }
+    }
+    class Client
+    {
+    static void Main(string[] args)
+    {
+        PaymentBridge PaymentProcess=new PaymentBridge(new PaypalService());
+        PaymentProcess.PayHere(250);
+        Console.WriteLine();
+        PaymentProcess.AddNewPayment(new UPIService());
+        PaymentProcess.PayHere(500);
+        Console.WriteLine();
+        PaymentProcess.AddNewPayment(new CreditCardService());
+        PaymentProcess.PayHere(1000);
+        
+    }
+    }
+}
+
