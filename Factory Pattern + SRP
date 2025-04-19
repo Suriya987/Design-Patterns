@@ -1,0 +1,139 @@
+Want to implement the Factory Pattern + SRP by building a Notification Service that can send:
+
+Email
+
+SMS
+
+Push notifications?
+
+You’ll use:
+
+One interface per notification type
+
+A NotificationFactory to return the correct implementation
+
+Follow SRP by avoiding bloated classes
+
+
+
+using System;
+using System.Collections.Generic;
+namespace Implementation2
+{
+    //interface INotification
+    //concrete Classes   SMS,Email,PUSH
+    //Factory Pattern  NotficationProvider { which will give the object of the service 
+    //Context class which will access the particular service
+    //main method
+    
+    
+    public interface INotification
+    {
+        void Send(string message);
+    }
+    
+    public class SMSNotification:INotification
+    {
+       public void Send(string message)
+       {
+           Console.WriteLine($"Received this message via  SMS  {message}");
+       }
+    }
+    
+    public class EmailNotification:INotification
+    {
+        public void Send(string message)
+        {
+            Console.WriteLine($"Received this message via Email {message}");
+        }
+    }
+    
+    public class PushNotification:INotification
+    {
+        public void Send(string message)
+        {
+            Console.WriteLine($"Received this message via Push {message}");
+        }
+    }
+    
+    //factory Pattern
+    public static class NotificationServiceProvider
+    {
+        //will use a hash map to store the service
+        private static Dictionary<string,Func<INotification>> _Services=
+        new Dictionary<string,Func<INotification>>
+         {
+             {"EMAIL",()=>new EmailNotification()},
+             {"SMS",()=>new SMSNotification()}
+         };
+         
+        //user can add a new service
+        public static void AddNotificationServices(Func<INotification> service,string serviceName)
+        {
+            _Services[serviceName.ToUpper()]=service;
+            Console.WriteLine($"{serviceName}  is registered successfully");
+        }
+        
+        //send the service object
+        public static INotification GetNotificationService(string type)
+        {
+            //check if the service available or registered
+            if(_Services.TryGetValue(type.ToUpper(), out var CreateInstance))
+            {
+                return CreateInstance();
+            }
+            else
+            {
+                Console.WriteLine("Service that you are looking for is not registered or not available");
+                return null;
+            }
+           // throw new Exception("Invalid Notification type");
+        }
+    }
+    
+    //context class
+    public class  NotificationService
+    {
+        private INotification _Notification;
+        
+        public NotificationService(INotification Notification)
+        {
+          _Notification=Notification;
+        }
+        
+        public void SendNotification(string message)
+        {
+            _Notification.Send(message);
+        }
+        
+    }
+    
+    public class Client
+    {
+        public static void Main(string[] args)
+        {
+            //get the NotificationService
+            var Email=NotificationServiceProvider.GetNotificationService("email");
+            //use the service to send email Notification
+            NotificationService email=new NotificationService(Email);
+            email.SendNotification("contacted via EMAIL");
+            
+            //SMS
+            var SMS=NotificationServiceProvider.GetNotificationService("sms");
+            //using the sms service
+            NotificationService sms=new NotificationService(SMS);
+            sms.SendNotification("contacted via SMS");
+            
+            //adding the PUSH Notification service
+             NotificationServiceProvider.AddNotificationServices(()=>new PushNotification(),"Push");
+             
+             var push=NotificationServiceProvider.GetNotificationService("push");
+             NotificationService PUSH=new NotificationService(push);
+             PUSH.SendNotification("Contacted via push");
+             
+             var WhatsApp=NotificationServiceProvider.GetNotificationService("Whatsapp");
+             //Whatsapp
+        }
+    }
+    
+}
