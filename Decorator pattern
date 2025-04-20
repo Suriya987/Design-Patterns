@@ -1,0 +1,85 @@
+Scenario : I have to send notification via email,sms,push. Once user is registered or changed their passwords.
+
+Old Appraoch or iniefficient : calls all the service from client code. which will not recommended.
+
+we  have use decorator which will wrap the another service with another one.
+
+using System;
+namespace implementation3
+{
+    //Interface INotification
+   //Concrete classes  Email,Sms,Push
+    //context class act as a bridge
+    //client code
+    
+    public interface INotification
+    {
+        void Send();
+    }
+    
+    public class SMSNotification:INotification
+    {
+        public void Send()
+        {
+            Console.WriteLine("Notified via SMSNotification");
+        }
+    }
+    
+    public class EmailNotification:INotification
+    {
+        private static INotification _next;
+        
+        public EmailNotification(INotification Next)
+        {
+           _next=Next; 
+        }
+        public void Send()
+        {
+            _next.Send();
+            Console.WriteLine("Notified via EmailNotification");
+        }
+    }
+    
+    public class PushNotification:INotification
+    {
+        private static INotification _next;
+        
+        public PushNotification(INotification Next)
+        {
+            _next=Next;
+        }
+        public void Send()
+        {
+            _next.Send();
+            Console.WriteLine("Notified via PushNotification");
+        }
+    }
+    
+    //context class acts as a bridge
+    // public class NotificationProvider
+    // {
+        
+    // }
+    
+    //client
+    public class client
+    {
+        public static void Main(string[] args)
+        {
+            //creating a base ref means which is the last service
+            INotification Notifier=new SMSNotification();
+            
+            //wrapping up with other services
+            Notifier =new EmailNotification(Notifier);
+            Notifier=new PushNotification(Notifier);
+            Notifier.Send();
+            
+            Console.WriteLine("Another scenario:");
+            //now we only need sms and email not PushNotification
+            INotification Notifier2=new SMSNotification();
+            Notifier2=new EmailNotification(Notifier2);
+            Notifier2.Send();
+        }
+    }
+    
+}
