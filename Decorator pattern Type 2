@@ -1,0 +1,137 @@
+Scenario: Send another type of notification only if it is failes 
+
+using System;
+namespace implementation3
+{
+    //Interface INotification
+   //Concrete classes  Email,Sms,Push
+    //client code
+    
+    public interface INotification
+    {
+        bool Send();
+    }
+    
+    public class SMSNotification:INotification
+    {
+        public bool Send()
+        {
+            bool isSuccess = trySend();
+            if(isSuccess)
+            {
+                Console.WriteLine("Message sent via SMSNotification");
+                return false;
+            }
+            else
+            {
+                Console.WriteLine("Sending is failed via SMSNotification");
+                return true;
+            }
+           // Console.WriteLine("Notified via SMSNotification");
+           // return false;
+        }
+        
+        private bool trySend()
+        {
+            return false;
+        }
+    }
+    
+    public class EmailNotification:INotification
+    {
+        private INotification _next;
+        
+        public EmailNotification(INotification Next)
+        {
+           _next=Next; 
+        }
+        public bool Send()
+        {
+            bool isSuccess=_next.Send();
+            if(isSuccess)
+            {
+               bool isDone=trySend();
+               if(isDone)
+               {
+                   Console.WriteLine("Message sent via EmailNotification");
+                   return false;
+               }
+               else
+               {
+                   return true;
+               }
+            }
+            else
+             return false;
+            // if(!isSuccess){
+            // Console.WriteLine("SMS Notification is failed");
+            // Console.WriteLine("Notified via EmailNotification");
+            // return true;
+            // }
+            // return false;
+            
+        }
+        
+        private bool trySend()
+        {
+            return true;
+        }
+    }
+    
+    public class PushNotification:INotification
+    {
+        private INotification _next;
+        
+        public PushNotification(INotification Next)
+        {
+            _next=Next;
+        }
+        public bool Send()
+        {
+            bool isSuccess=_next.Send();
+            if(isSuccess)
+            {
+                bool isDone=trySend();
+                if(isDone)
+                {
+                    Console.WriteLine("Message sent via PushNotification");
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            else
+            return true;
+        }
+        
+        private bool trySend()
+        {
+            return true;
+        }
+    }
+    
+    
+    //client
+    public class client
+    {
+        public static void Main(string[] args)
+        {
+            //creating a base ref means which is the last service
+            INotification Notifier=new SMSNotification();
+            
+            //wrapping up with other services
+            Notifier =new EmailNotification(Notifier);
+            Notifier=new PushNotification(Notifier);
+            Notifier.Send();
+            
+            Console.WriteLine("Another scenario:");
+            //now we only need sms and email not PushNotification
+            INotification Notifier2=new SMSNotification();
+            Notifier2=new EmailNotification(Notifier2);
+            Notifier2.Send();
+        }
+    }
+    
+}
