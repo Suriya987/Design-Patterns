@@ -1,0 +1,98 @@
+using System;
+namespace SingletonPattern;
+
+public interface INotificationService
+{
+    void SendNotification();
+}
+
+public interface ILoggingService
+{
+    void Log(string message);
+}
+
+public interface IPaymentService
+{
+    void PayNow(long amount);
+}
+
+public class Logger : ILoggingService
+{
+    private static readonly object _lock = new object();
+    private Logger()
+    {
+    }
+
+    public static Logger Instance { get; private set; }
+
+    public static Logger CreateInstance()
+    {
+        if (Instance == null)
+        {
+            lock(_lock)
+            {
+                Instance = new Logger();
+            }
+        }
+
+        return Instance;
+    }
+
+    public void Log(string message)
+    {
+        Console.WriteLine(message);
+    }
+}
+
+public class SMSNotification : INotificationService
+{
+    private readonly Logger _logger;
+
+    public SMSNotification(Logger logger) 
+    {
+        _logger= logger;
+    }
+
+    public void SendNotification()
+    {
+        _logger.Log("SMS Sent Successfully");
+    }
+}
+
+public class MobilePayment : IPaymentService
+{
+    private readonly Logger _logger;
+
+    public MobilePayment(Logger logger)
+    {
+        _logger = logger;
+    }
+    private long Amount = 200000;
+
+    public void PayNow(long amount)
+    {
+        if (amount > Amount)
+        {
+            _logger.Log($"Insufficient Balance ; {Amount}");
+            //Console.WriteLine();
+            return;
+        }
+        _logger.Log($"Payment Successful Rs : {amount}");
+       // Console.WriteLine($"Payment Successful Rs : {amount}");
+        Amount -= amount;
+    }
+}
+class  Client
+{
+    public static void Main(string[] args)
+    {
+        Logger logger = Logger.CreateInstance();
+
+        IPaymentService mobilePay=new MobilePayment(logger);
+        INotificationService notify=new SMSNotification(logger);
+
+        mobilePay.PayNow(10000);
+        notify.SendNotification();
+        Console.ReadLine();
+    }
+}
