@@ -1,0 +1,161 @@
+/*
+  
+You are building a Customer Management Console App for internal use at Comcast.
+
+Functional Requirements:
+Create a model for a Customer with properties: ID, Name, and Email.
+
+Implement a Repository Pattern to handle:
+
+Adding a new customer.
+
+Retrieving all customers.
+
+Fetching a customer by ID.
+
+Implement a Service Layer to consume the repository.
+
+Demonstrate the following from Main():
+
+Add at least 3 different customers.
+
+Fetch all customers and display them.
+
+Retrieve one customer by ID and display their details.
+
+*/
+
+using System;
+using System.Collections.Generic;
+
+namespace RepositoryPattern;
+
+public class UserDetails
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string Email { get; set; }
+}
+
+public class UserDetailsDto
+{
+    public string Name { get; set; }
+    public string Email { get; set; }
+}
+
+public interface IUserRepository
+{
+    //UserDetails 
+    List<UserDetails> GetAllUser();
+    UserDetails? GetUserById(int id);
+    void CreateUser(UserDetailsDto userDetailsDto);
+}
+
+public class UserRepository : IUserRepository
+{
+    private static List<UserDetails> _users = new();
+    private static int id = 111;
+    public void CreateUser(UserDetailsDto userDetailsDto)
+    {
+        var Email=_users.FirstOrDefault(u=>u.Email== userDetailsDto.Email);
+        if (Email != null)
+        {
+            // Console.WriteLine("Email is already Exist !  Please provide diff Email Id");
+            throw new InvalidOperationException($"The email {userDetailsDto.Email} already exists. Please provide a different email.");
+            //return;
+        }
+        else
+        {
+            var users = new UserDetails
+            {
+                Id = id++,
+                Name = userDetailsDto.Name,
+                Email = userDetailsDto.Email
+            };
+            _users.Add(users);
+        }
+    }
+
+    public List<UserDetails> GetAllUser()
+    {
+        var users=_users.ToList();
+        return users;
+    }
+
+    public UserDetails? GetUserById(int id)
+    {
+        var user=_users.FirstOrDefault(u=>u.Id==id);
+        if (user != null)
+        {
+            return user;
+        }
+        Console.WriteLine("We cant find the User for provided Id , Please check your id and Try again");
+        return null;
+    }
+}
+
+public class UserService
+{
+    private readonly IUserRepository _userRepository;
+
+    public UserService(IUserRepository userRepository)
+    {
+        _userRepository = userRepository;
+    }
+    public void CreateUser(UserDetailsDto userDetailsDto)
+    {
+        _userRepository.CreateUser(userDetailsDto);
+    }
+
+    public void GetuserByid(int id)
+    {
+        var user = _userRepository.GetUserById(id);
+        if (user != null)
+        {
+            Console.WriteLine($"Id : {user.Id}  ,   Name : {user.Name}  , Email : {user.Email}");
+        }
+    }
+
+    public void GetAllusers()
+    {
+        var users = _userRepository.GetAllUser();
+        if (users.Count > 0)
+        {
+            foreach (var user in users)
+            {
+                Console.WriteLine($"Id : {user.Id}  ,   Name : {user.Name}  , Email : {user.Email}");
+            }
+            return;
+        }
+        Console.WriteLine("We dont have users as of now !");
+
+    }
+}
+
+class Client
+{
+    public static void Main(string[] args)
+    {
+        IUserRepository service=new UserRepository();
+        UserService services=new UserService(service);
+
+        //creating a user 
+        UserDetailsDto suriya=new UserDetailsDto();
+        suriya.Name = "Suriya";
+        suriya.Email = "suriya@gmail.com";
+
+        UserDetailsDto sudhar=new UserDetailsDto();
+        sudhar.Name = "Surendar";
+        sudhar.Email = "suriya@gmail.com";
+
+        services.CreateUser(sudhar);
+        services.CreateUser(suriya);
+
+        services.GetAllusers();
+        services.GetuserByid(111);
+
+        Console.ReadLine();
+
+
+    }
+}
