@@ -1,0 +1,122 @@
+using System;
+using System.Runtime.CompilerServices;
+namespace builderPattern;
+
+
+public class  Dishes
+{
+     public string? MainDish {  get; set; }
+     
+     public string? SoftDrinks { get; set; }
+
+     public string? SideDish { get; set; }
+
+
+     public void GetDishes(Dishes dish)
+    {
+        if (dish.MainDish != null)
+        {
+            Console.WriteLine($"Main Dish : {dish.MainDish}");
+        }
+
+        if (dish.SoftDrinks != null)
+        {
+            Console.WriteLine($"SoftDrinks: {dish.SoftDrinks}");
+        }
+
+        if (dish.SideDish != null)
+        {
+            Console.WriteLine($"SideDish : {dish.SideDish}");
+        }
+    }
+
+    public void GetDishes()
+    {
+        if (MainDish != null)
+        {
+            Console.WriteLine($"Main Dish : {MainDish}");
+        }
+
+        if (SoftDrinks != null)
+        {
+            Console.WriteLine($"SoftDrinks: {SoftDrinks}");
+        }
+
+        if (SideDish != null)
+        {
+            Console.WriteLine($"SideDish : {SideDish}");
+        }
+    }
+}
+
+public interface IMeal
+{
+     
+     void SetMainDish( string? mainDish );
+     void SetSoftDrinks ( string? softDrinks );
+     void SetSideDish ( string? sideDish );
+     Dishes GetMeal();
+
+}
+
+public class OrderMeal : IMeal
+{
+    private Dishes _dishes=new Dishes();
+
+     public void SetMainDish(string mainDish)
+    {
+       _dishes.MainDish = mainDish;
+    }
+
+     public void SetSoftDrinks(string softDrinks)
+    {
+        _dishes.SoftDrinks = softDrinks;
+    }
+
+     public void SetSideDish(string sideDish)
+    {
+        _dishes.SideDish = sideDish;
+    }
+
+     public Dishes GetMeal()
+    {
+        return _dishes;
+    }
+}
+
+
+public class User
+{
+    public static void Main(string[] args)
+    {
+        IMeal NonVegmeal = new OrderMeal();
+
+        NonVegmeal.SetMainDish("ChickenBiryani");
+        NonVegmeal.SetSideDish("FriedChicken");
+        NonVegmeal.SetSoftDrinks("Coke");
+       
+
+        Dishes myNonVegDish = NonVegmeal.GetMeal();
+
+        myNonVegDish.GetDishes();
+
+
+        IMeal VegMeal= new OrderMeal();
+
+        VegMeal.SetMainDish("FullMeals");
+        VegMeal.SetSoftDrinks("LemonJuice");
+
+        Dishes myVegMeal = VegMeal.GetMeal();
+
+        myVegMeal.GetDishes();
+
+        // Dishes getDishes= new Dishes();
+        //getDishes.GetDishes(myNonVegDish);
+        //getDishes.GetDishes(myVegMeal);
+
+        Console.ReadLine();
+
+
+
+    }
+}
