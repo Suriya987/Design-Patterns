@@ -1,0 +1,65 @@
+/*  our Task:
+The class LegacyReportService is already in production and cannot be modified.
+
+You have to support the new interface IReportGenerator for future extensibility and polymorphism.
+
+Your job is to create a class that implements IReportGenerator but reuses the LegacyReportService
+
+    */
+
+/*
+ 
+ You are building a reporting system that generates reports in a new standardized format using an interface:
+
+public interface IReportGenerator
+{
+    void GenerateReport(string title, string content);
+}
+
+However, your company already has a legacy class that is actively used across teams:
+
+ public class LegacyReportService
+{
+    public void CreateReportFile(string header, string body)
+    {
+        Console.WriteLine($"Generating report:\nHeader: {header}\nBody: {body}");
+    }
+}
+ */
+
+using System;
+namespace AdapterPattern;
+
+public class LegacyReportService
+{
+    public void CreateReportFile(string header,string body)
+    {
+        Console.WriteLine($" \n  {header} \n  {body}");
+    }
+}
+
+public interface IReportGenerator
+{
+    void GenerateReport(string title, string content);
+}
+
+public class ReportGenerator : IReportGenerator
+{
+    private LegacyReportService _Legacy = new LegacyReportService();
+
+     public void GenerateReport(string title, string content)
+    {
+        _Legacy.CreateReportFile(title, content);
+    }
+
+}
+
+public class User
+{
+    public static void Main(string[] args)
+    {
+        IReportGenerator reportGenerator = new ReportGenerator();
+        reportGenerator.GenerateReport("Regarding - Job Offer ", "Hi Suriya Thangadurai ,We excited to inform you that we offered you a role as a Development Engineer 2 at Comcast ! Congratulations .. HR will contact you for further discussions");
+        Console.ReadLine();
+    }
+}
