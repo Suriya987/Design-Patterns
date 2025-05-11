@@ -1,0 +1,129 @@
+/*
+ Scenario:
+
+You have a BankAccountService class that performs actual balance withdrawals.
+It is already working and in use.
+
+Now, the new requirement is to:
+
+Restrict users from withdrawing more than ₹25,000 at once.
+
+Log all withdrawal attempts.
+
+❌ You can't change the existing BankAccountService.
+
+✅ Your task is to implement a Proxy class that:
+
+Implements the same interface.
+
+Internally uses BankAccountService to perform the real withdrawal only if the rules pass. 
+ */
+
+using System;
+namespace ProxyPattern;
+
+public interface ILoggerService
+{
+    public void LogInfo(string message);
+}
+
+public class Logger:ILoggerService
+{
+    private static Logger service;
+    private  static readonly object _lock = new object();
+
+    private Logger()
+    {
+    }
+
+    public static Logger GetInstance()
+    {
+        if (service == null)
+        {
+            lock (_lock)
+            {
+                service = new Logger();
+            }
+        }
+        return service;
+    }
+    public void LogInfo(string message)
+    {
+        Console.WriteLine(message);
+    }
+}
+public class BankApplication
+{
+    private long CashBalance = 100000;
+    
+    private readonly ILoggerService _Log = Logger.GetInstance();
+   
+     public void WithdrawAmount(long amount)
+    {
+        CashBalance -= amount;
+        _Log.LogInfo($"Amount Rs : {amount}  Withdrawn Successfull ");
+    }
+
+    public void BalanceAmount()
+    {
+        _Log.LogInfo($" Your current Balance : {CashBalance}");
+    }
+}
+
+public interface IBankService
+{
+    void WithDrawAmount(long amount);
+    void CheckBalance();
+}
+
+public class BankService : IBankService
+{
+  
+    private long LimitPerTransaction = 25000;
+    private readonly ILoggerService _log = Logger.GetInstance();
+
+    private readonly BankApplication _bankApplication ;
+
+    public BankService(BankApplication bankApplication)
+    {
+        _bankApplication = bankApplication;
+    }
+    
+
+    
+    public void WithDrawAmount(long amount)
+    {
+        if (amount > LimitPerTransaction)
+        {
+            _log.LogInfo($"Withdraw Amount should be lesser than {LimitPerTransaction} ");
+            return;
+        }
+        _bankApplication.WithdrawAmount(amount);
+
+    }
+    public void CheckBalance()
+    {
+       _bankApplication.BalanceAmount();
+    }
+}
+
+public class user
+{
+    public static void Main(string[] args)
+    {
+        BankApplication user1= new BankApplication();
+        IBankService bank = new BankService(user1);
+        bank.WithDrawAmount(24000);
+        bank.WithDrawAmount(40000);
+        bank.CheckBalance();
+
+        Console.WriteLine("---------------------------------  User 2 -------------------------------------------------------");
+        BankApplication user2=new BankApplication();
+        bank = new BankService(user2);
+        bank.WithDrawAmount(10000);
+        bank.WithDrawAmount(36000);
+        bank.CheckBalance();
+
+        Console.ReadLine();
+    }
+}
