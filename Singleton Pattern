@@ -96,3 +96,101 @@ class  Client
         Console.ReadLine();
     }
 }
+
+
+Scenario :  //Task ->  
+//1.Create a logger class using Singleton pattern 
+//2. It should be threadSafe {  lock }
+//3. log messages with timestamps 
+//4. implement the  Log(String message)
+
+using System;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Collections.Generic;
+using System.Threading;
+namespace practice
+{ 
+
+//singleton class
+    public class Logger
+    {
+        private List<string> _loggedMessages = new List<string>();
+        private Logger() { }
+
+        public static Logger _instance;
+         private static readonly object _lock=new object();
+        public static Logger GetInstance()
+        {
+            lock (_lock)
+            {
+                if(_instance == null)
+                {
+              
+                _instance = new Logger();
+                
+                }
+            }
+            return _instance;
+        }
+        public async Task LogMessage(string message)
+        {
+              Task.Delay(10000).Wait();
+             DateTime now = DateTime.Now;
+             string Message = $"Message: {message} | Time Stamp: {now}";
+             _loggedMessages.Add(Message);
+            // Console.WriteLine($"{Message}");
+        }
+
+        public void PrintLog()
+        {
+            var logsList = _loggedMessages.ToList();
+
+            foreach (var log in logsList)
+            {
+                Console.WriteLine(log);
+            }
+        }
+    }
+
+     public interface IService
+    {
+        void Print(string Message);
+        void PrintLogs();
+    }
+
+    public class Service : IService
+    {
+        private readonly Logger instnce= Logger.GetInstance();
+        public void Print(string Message)
+        {
+            instnce.LogMessage(Message);
+        }
+
+        public void PrintLogs()
+            {
+                instnce.PrintLog();
+            }
+    }
+
+    public class User
+    {
+        public static void Main(string[] args)
+        {
+            IService instance1 = new Service();
+
+            instance1.Print("Message from instance1");
+             
+            IService instance2 = new Service();
+
+           // Thread.Sleep(TimeSpan.FromMinutes(1));
+
+            instance2.Print("Message from instance2");
+
+            instance2.PrintLogs();
+
+            Console.ReadLine();
+        }
+    }
+
+}
