@@ -137,3 +137,111 @@ namespace Implementation2
     }
     
 }
+
+task :
+//create a interface by using any method  Vehicle  -> Drive(method)
+
+///create a abstract class for having a base for getting or registering service
+// VehicleService ->  RegisterService  ,  getService
+// User  add the service and then consume
+
+
+using System;
+namespace Factorymethod
+{
+
+    //create a interface by using any method  Vehicle  -> Drive(method)
+
+    ///create a abstract class for having a base for getting or registering service
+    // VehicleService ->  RegisterService  ,  getService
+    // User  add the service and then consume
+
+    public interface Vehicle
+    {
+        void Drive();
+    }
+
+    public class Car : Vehicle
+    {
+        public void Drive()
+        {
+            Console.WriteLine("I am Driving my Car");
+        }
+    }
+
+    public class Lorry : Vehicle
+    {
+        public void Drive()
+        {
+            Console.WriteLine("I am Driving my Lorry");
+        }
+    }
+
+    public class Bike : Vehicle
+    {
+        public void Drive()
+        {
+            Console.WriteLine("I am Driving my Bike");
+        }
+    }
+
+    public abstract class VehicleService
+    {
+
+        public abstract void RegisterService<T>(string serviceName,T service) where T : Vehicle;
+        public abstract Vehicle?  GetService(string serviceName);
+    }
+
+    public class Service : VehicleService
+    {
+        private static readonly Dictionary<string, Vehicle> _service = new Dictionary<string, Vehicle>();
+
+        public override Vehicle? GetService(string serviceName)
+        {
+            if (_service.ContainsKey(serviceName))
+            {
+                return _service[serviceName];
+            }
+            Console.WriteLine("Service is Not Found");
+            return null;
+        }
+
+        public override void RegisterService<T>(string serviceName, T Service)  
+        {
+           //  Vehicle vehicle = service as Vehicle;
+
+            if (!_service.ContainsKey(serviceName))
+            {
+                _service[serviceName] = Service;    
+            }
+            else
+            {
+                Console.WriteLine("Service Name is already taken, Try Different Name ");
+            }
+        }
+    }
+
+    public class User
+    {
+        public static void Main(string[] args)
+        {
+            VehicleService service = new Service();
+            Vehicle car=new Car();
+            Vehicle bike = new Bike();
+            Vehicle lorry=new Lorry();
+
+            service.RegisterService("CAR",new Car());
+            service.RegisterService("BIKE", bike);
+            service.RegisterService("LORRY", lorry);
+
+            Vehicle lorryService=service.GetService("CAR");
+            lorryService.Drive();
+            Console.ReadLine();
+        }
+    }
+
+
+
+
+
+}
