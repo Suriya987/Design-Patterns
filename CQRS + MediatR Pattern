@@ -1,0 +1,32 @@
+CQRS_Pattern/
+│
+├── Controllers/
+│     └── ProductController.cs
+│
+├── Data/
+│     └── IDBContext.cs
+│     └── DBContext.cs
+│
+├── Model/
+│     └── ProductModel.cs
+│
+├── Handler/
+│     └── QueryHandler.cs
+│     └── CommandHandler.cs
+│
+├── IHandler/
+│     └── IQueryHandler.cs
+│     └── ICommandHandler.cs
+│
+├── MediatR/
+│     ├── Queries/
+│     │     └── GetProductByIdQuery.cs
+│     ├── Commands/
+│     │     └── AddProductCommand.cs
+│     └── Handlers/
+│           ├── GetProductByIdHandler.cs
+│           └── AddProductHandler.cs
+│
+└── Program.cs
+
+
